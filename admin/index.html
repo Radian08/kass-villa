@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#7C6FCD" />
+  <title>Admin — Kas Villa</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css" />
+  <link rel="stylesheet" href="../assets/css/main.css" />
+</head>
+<body>
+  <div id="app-loading" class="app-loading">
+    <div class="spinner"></div>
+    <p style="color:var(--text-muted);font-size:0.9rem">Sinkron data…</p>
+  </div>
+  <div class="overlay no-print" id="overlay" onclick="closeSidebar()"></div>
+
+  <div class="app-shell">
+    <aside class="sidebar no-print" id="sidebar">
+      <div class="sidebar-brand">
+        <h2><i class="ti ti-home-heart"></i> <span id="villa-name">Kas Villa</span></h2>
+        <span>Panel Administrator</span>
+      </div>
+      <nav class="nav-list">
+        <button class="nav-item active" data-panel="overview"><i class="ti ti-dashboard"></i> Ringkasan</button>
+        <button class="nav-item" data-panel="members"><i class="ti ti-users"></i> Anggota</button>
+        <button class="nav-item" data-panel="transactions"><i class="ti ti-receipt-2"></i> Transaksi</button>
+        <button class="nav-item" data-panel="claims"><i class="ti ti-clock-check"></i> Konfirmasi Bayar <span class="nav-badge" id="badge-claims" style="display:none">0</span></button>
+        <button class="nav-item" data-panel="announcements"><i class="ti ti-speakerphone"></i> Pengumuman</button>
+        <button class="nav-item" data-panel="activity"><i class="ti ti-history"></i> Aktivitas</button>
+        <button class="nav-item" data-panel="settings"><i class="ti ti-settings"></i> Pengaturan</button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-chip">
+          <div class="user-avatar">A</div>
+          <div><strong>Admin</strong><br><span style="color:var(--text-muted);font-size:11px">Pengurus kas</span></div>
+        </div>
+        <button class="btn btn-outline" style="width:100%" onclick="logout()"><i class="ti ti-logout"></i> Keluar</button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar no-print">
+        <button class="menu-toggle" onclick="openSidebar()"><i class="ti ti-menu-2"></i></button>
+        <h1 id="page-title">Ringkasan</h1>
+        <div class="topbar-actions">
+          <div class="sync-pill" data-sync-status title="Status sinkron cloud">
+            <span class="sync-dot"></span><span class="sync-label">…</span>
+          </div>
+          <button class="btn-icon" onclick="window.print()" title="Cetak"><i class="ti ti-printer"></i></button>
+          <button class="btn btn-outline btn-sm" onclick="exportExcelAll()"><i class="ti ti-file-spreadsheet"></i> Excel</button>
+          <button class="btn btn-wa btn-sm" onclick="broadcastWA()"><i class="ti ti-brand-whatsapp"></i> Tagih</button>
+        </div>
+      </header>
+
+      <div class="content">
+        <!-- OVERVIEW -->
+        <section id="panel-overview" class="panel active">
+          <div class="grid-4" style="margin-bottom:1rem">
+            <div class="card kpi" style="border-color:var(--accent)">
+              <div class="kpi-label">Total Anggota</div>
+              <div class="kpi-value" id="kpi-members">0</div>
+            </div>
+            <div class="card kpi" style="border-color:var(--green)">
+              <div class="kpi-label">Pemasukan</div>
+              <div class="kpi-value" id="kpi-masuk">Rp 0</div>
+            </div>
+            <div class="card kpi" style="border-color:var(--red)">
+              <div class="kpi-label">Pengeluaran</div>
+              <div class="kpi-value" id="kpi-keluar">Rp 0</div>
+            </div>
+            <div class="card kpi" style="border-color:var(--orange)">
+              <div class="kpi-label">Penunggak</div>
+              <div class="kpi-value" id="kpi-nunggak">0</div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <h3><i class="ti ti-chart-donut"></i> Arus Kas</h3>
+              <div class="chart-donut-wrap">
+                <canvas id="chart-kas"></canvas>
+                <div class="chart-center">
+                  <div class="kpi-label">Saldo</div>
+                  <div class="kpi-value" style="font-size:1rem" id="kpi-saldo">Rp 0</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <h3><i class="ti ti-chart-bar"></i> Top Tunggakan</h3>
+              <div class="chart-box"><canvas id="chart-debt"></canvas></div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+              <h3 style="margin:0"><i class="ti ti-progress"></i> Progres Iuran</h3>
+              <strong id="progress-pct">0%</strong>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+            <div class="stat-row">
+              <span id="progress-collected">Terkumpul: Rp 0</span>
+              <span id="progress-target">Target: Rp 0</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3><i class="ti ti-calendar-stats"></i> Rekap per Periode</h3>
+            <div id="weekly-mini" class="grid-4"></div>
+          </div>
+        </section>
+
+        <!-- MEMBERS -->
+        <section id="panel-members" class="panel">
+          <div class="card">
+            <div class="filter-bar no-print">
+              <input type="search" id="search-member" placeholder="Cari nama..." oninput="renderMembers()" style="flex:1;min-width:160px" />
+              <button class="btn btn-primary btn-sm" onclick="openMemberModal()"><i class="ti ti-plus"></i> Anggota</button>
+              <button class="btn btn-outline btn-sm" onclick="toggleSort()"><i class="ti ti-sort-descending"></i> Urut Tunggak</button>
+              <button class="btn btn-outline btn-sm" id="btn-filter-nunggak" onclick="toggleFilterNunggak()"><i class="ti ti-filter"></i> Nunggak</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr id="table-head"></tr></thead>
+                <tbody id="member-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- TRANSACTIONS -->
+        <section id="panel-transactions" class="panel">
+          <div class="card no-print">
+            <h3><i class="ti ti-plus"></i> Tambah Transaksi</h3>
+            <div class="grid-2" style="margin-top:12px;align-items:end">
+              <input type="text" id="tx-desc" placeholder="Keterangan" />
+              <input type="number" id="tx-amount" placeholder="Nominal (Rp)" />
+              <select id="tx-type">
+                <option value="keluar">Pengeluaran</option>
+                <option value="masuk">Pemasukan</option>
+              </select>
+              <button class="btn btn-primary" onclick="addTx()">Simpan</button>
+            </div>
+          </div>
+          <div id="tx-list"></div>
+        </section>
+
+        <!-- CLAIMS -->
+        <section id="panel-claims" class="panel">
+          <div class="card">
+            <h3><i class="ti ti-clock-check"></i> Konfirmasi Pembayaran dari Anggota</h3>
+            <p style="font-size:12px;color:var(--text-muted);margin:8px 0 14px">Anggota melaporkan bayar lewat portal. Setujui untuk mencatat iuran.</p>
+            <div id="claims-list"></div>
+          </div>
+        </section>
+
+        <!-- ANNOUNCEMENTS -->
+        <section id="panel-announcements" class="panel">
+          <div class="card no-print">
+            <h3><i class="ti ti-speakerphone"></i> Buat Pengumuman</h3>
+            <div class="form-stack" style="margin-top:12px">
+              <input type="text" id="ann-title" placeholder="Judul" />
+              <textarea id="ann-body" rows="3" placeholder="Isi pengumuman..."></textarea>
+              <button class="btn btn-primary" onclick="addAnnouncement()">Terbitkan</button>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Daftar Pengumuman</h3>
+            <div id="ann-list-admin"></div>
+          </div>
+        </section>
+
+        <!-- ACTIVITY -->
+        <section id="panel-activity" class="panel">
+          <div class="card">
+            <h3><i class="ti ti-history"></i> Log Aktivitas</h3>
+            <div id="activity-list" style="margin-top:12px"></div>
+          </div>
+        </section>
+
+        <!-- SETTINGS -->
+        <section id="panel-settings" class="panel">
+          <div class="card">
+            <h3><i class="ti ti-settings"></i> Parameter Iuran</h3>
+            <div class="form-stack" style="margin-top:12px">
+              <div><label class="kpi-label">Nama Villa</label><input type="text" id="conf-villa" /></div>
+              <div><label class="kpi-label">Jumlah Periode</label><input type="number" id="conf-count" /></div>
+              <div><label class="kpi-label">Prefix (Minggu/M)</label><input type="text" id="conf-prefix" /></div>
+              <div><label class="kpi-label">Nominal per Periode (Rp)</label><input type="number" id="conf-nominal" /></div>
+              <button class="btn btn-primary" onclick="applyConfig()">Simpan Parameter</button>
+            </div>
+          </div>
+          <div class="card">
+            <h3><i class="ti ti-brand-whatsapp"></i> Kontak Pengurus</h3>
+            <div class="form-stack" style="margin-top:12px">
+              <input type="tel" id="conf-admin-wa" placeholder="628... (untuk tombol hubungi di portal anggota)" />
+              <button class="btn btn-outline" onclick="saveAdminWa()">Simpan Nomor</button>
+            </div>
+          </div>
+          <div class="card">
+            <h3><i class="ti ti-shield-lock"></i> Keamanan Admin</h3>
+            <div class="form-stack" style="margin-top:12px">
+              <input type="text" id="conf-admin-user" placeholder="Username baru" />
+              <input type="password" id="conf-admin-pass" placeholder="Password baru" />
+              <button class="btn btn-outline" onclick="updateAdminCreds()">Ubah Kredensial</button>
+            </div>
+          </div>
+          <div class="card">
+            <h3><i class="ti ti-cloud"></i> Sinkron Cloud</h3>
+            <div id="sync-settings-info" style="margin-top:12px"></div>
+            <p style="font-size:12px;color:var(--text-muted);margin-top:12px">
+              Data otomatis sama di HP/komputer lain setelah Firebase diatur (sekali saja).
+              <a href="../SETUP-FIREBASE.md" target="_blank">Panduan setup</a>
+            </p>
+            <div class="filter-bar" style="margin-top:12px">
+              <button class="btn btn-outline btn-sm" onclick="exportBackup()"><i class="ti ti-download"></i> Cadangan opsional</button>
+              <button class="btn btn-outline btn-sm" onclick="Sync.pushNow()"><i class="ti ti-refresh"></i> Paksa sinkron</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal" class="modal no-print">
+    <div class="modal-box">
+      <h3 id="modal-title">Edit</h3>
+      <div class="form-stack">
+        <input type="hidden" id="modal-mode" />
+        <input type="hidden" id="modal-id" />
+        <input type="text" id="modal-name" placeholder="Nama" />
+        <input type="text" id="modal-phone" placeholder="WhatsApp 628..." />
+        <div id="modal-tx-fields" style="display:none">
+          <input type="number" id="modal-amount" placeholder="Nominal" />
+          <select id="modal-tx-type">
+            <option value="masuk">Pemasukan</option>
+            <option value="keluar">Pengeluaran</option>
+          </select>
+        </div>
+        <div id="modal-pin-hint" class="hint" style="display:none"></div>
+        <div style="display:flex;gap:10px;margin-top:8px">
+          <button class="btn btn-outline" style="flex:1" onclick="closeModal()">Batal</button>
+          <button class="btn btn-primary" style="flex:1" id="modal-save">Simpan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast no-print"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="../firebase-config.js"></script>
+  <script src="../assets/js/core.js"></script>
+  <script src="../assets/js/sync.js"></script>
+  <script src="../assets/js/admin.js"></script>
+</body>
+</html>

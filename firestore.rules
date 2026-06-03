@@ -1,0 +1,9 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Ganti villa-rahasia-anda dengan nilai VILLA_SYNC_ID di firebase-config.js
+    match /kasVilla/{villaId} {
+      allow read, write: if villaId == 'kas-villa-2026';
+    }
+  }
+}
