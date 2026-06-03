@@ -5,10 +5,6 @@
   --admin-accent: #3b82f6;
   --admin-accent-light: rgba(59, 130, 246, 0.18);
   --admin-accent-dark: #1d4ed8;
-  
-  --green: #4ecdc4;
-
-}
   --green: #4ecdc4;
   --green-light: rgba(78, 205, 196, 0.18);
   --green-dark: #2a9d94;
@@ -19,7 +15,7 @@
   --card: rgba(10, 10, 28, 0.65);
   --card-border: rgba(124, 111, 205, 0.28);
   --text: #e8e6f0;
-  --text-muted: rgba(232, 230, 240, 0.5);
+  --text-muted: rgba(232, 230, 240, 0.62);
   --border: rgba(124, 111, 205, 0.22);
   --radius: 14px;
   --shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
@@ -296,27 +292,40 @@ body.admin .sidebar {
   background: rgba(8, 8, 25, 0.85);
   backdrop-filter: var(--blur);
   border-bottom: 1px solid var(--card-border);
-  padding: 0.9rem 1.25rem;
+  padding: 0.75rem 1rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
+  min-width: 0;
 }
 
 .topbar h1 {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
 }
 
 .topbar-actions {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
+  flex-shrink: 0;
 }
 
 .content {
-  padding: 1.25rem;
+  padding: 1rem;
   max-width: 1200px;
+}
+
+@media (min-width: 600px) {
+  .content {
+    padding: 1.25rem;
+  }
 }
 
 .panel {
@@ -728,6 +737,19 @@ td {
   gap: 8px;
   flex-wrap: wrap;
   margin-bottom: 12px;
+  align-items: center;
+}
+
+@media (max-width: 480px) {
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filter-bar input,
+  .filter-bar select,
+  .filter-bar .btn {
+    width: 100%;
+  }
 }
 
 .menu-toggle {
@@ -766,6 +788,42 @@ td {
   }
 }
 
+@media (max-width: 480px) {
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .card {
+    padding: 0.85rem 0.9rem;
+    margin-bottom: 0.75rem;
+  }
+  .kpi-value {
+    font-size: 1.05rem;
+  }
+  .modal-box {
+    padding: 1.1rem;
+    border-radius: 14px;
+    max-height: 95vh;
+  }
+  .btn {
+    padding: 9px 13px;
+    font-size: 0.82rem;
+  }
+  table {
+    min-width: 480px;
+  }
+  .week-grid {
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 6px;
+  }
+  .week-cell {
+    padding: 10px 6px;
+    font-size: 0.74rem;
+  }
+  .topbar-actions .btn span {
+    display: none;
+  }
+}
+
 @media print {
   .no-print {
     display: none !important;
@@ -788,8 +846,9 @@ td {
 
 .toast {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: 16px;
+  right: 16px;
+  left: 16px;
   background: rgba(8, 8, 25, 0.95);
   border: 1px solid var(--green);
   color: var(--text);
@@ -801,6 +860,14 @@ td {
   transform: translateY(80px);
   opacity: 0;
   transition: 0.3s;
+  text-align: center;
+}
+
+@media (min-width: 480px) {
+  .toast {
+    left: auto;
+    max-width: 360px;
+  }
 }
 
 .toast.show {
