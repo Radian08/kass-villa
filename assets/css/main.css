@@ -48,7 +48,7 @@ body::before {
   inset: 0;
   background: linear-gradient(160deg, rgba(5, 5, 20, 0.35), rgba(15, 10, 40, 0.2));
   pointer-events: none;
-  z-index: 0;
+  z-index: -1; /* FIX: turunkan ke -1 agar tidak menghalangi elemen apapun */
 }
 
 a {
@@ -159,8 +159,6 @@ a {
 .app-shell {
   display: flex;
   min-height: 100vh;
-  position: relative;
-  z-index: 1;
 }
 
 .sidebar {
@@ -174,7 +172,7 @@ a {
   top: 0;
   left: 0;
   bottom: 0;
-  z-index: 200;
+  z-index: 300; /* FIX: naikkan dari 200 ke 300, harus lebih tinggi dari overlay (150) */
   transition: transform 0.25s;
   /* Default = warna customer/ijo */
   --sidebar-accent: var(--accent);
@@ -768,6 +766,11 @@ td {
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
   z-index: 150;
+  pointer-events: none; /* FIX: pastikan tidak memblokir klik saat tersembunyi */
+}
+
+.overlay.show {
+  pointer-events: auto; /* FIX: aktifkan pointer-events hanya saat overlay benar-benar tampil */
 }
 
 @media (max-width: 900px) {
@@ -965,4 +968,415 @@ td {
 .sync-info-card.warn {
   border-color: var(--orange);
   background: var(--orange-light);
+  color: #fcd34d;
+}
+
+/* ===== Mobile-first improvements ===== */
+.mobile-member-cards {
+  display: none;
+}
+
+.backup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.backup-actions .btn {
+  flex: 1 1 auto;
+  min-width: 140px;
+}
+
+.member-card {
+  background: rgba(10, 10, 28, 0.75);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.member-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.member-card-name {
+  font-size: 1rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.member-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.member-card-debt {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--red);
+}
+
+.member-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.member-card-actions .btn-icon {
+  min-width: 40px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-wa-icon {
+  color: #25d366 !important;
+  border-color: rgba(37, 211, 102, 0.35) !important;
+}
+
+.week-toggle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 8px;
+}
+
+.week-toggle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px 6px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(224, 90, 122, 0.08);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 52px;
+  user-select: none;
+  position: relative;
+}
+
+.week-toggle.on {
+  background: var(--green-light);
+  border-color: rgba(78, 205, 196, 0.45);
+  color: var(--green);
+}
+
+.week-toggle input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+@media (max-width: 900px) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .content {
+    padding: 0.75rem;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  }
+
+  /* Topbar mobile: lebih compact */
+  .topbar {
+    padding: 0.65rem 0.75rem;
+    gap: 6px;
+  }
+
+  .topbar h1 {
+    font-size: 0.9rem;
+  }
+
+  .topbar-actions {
+    gap: 4px;
+    flex-wrap: nowrap;
+  }
+
+  /* Sembunyikan print & excel di mobile, biar topbar tidak penuh */
+  .topbar-actions .btn-icon,
+  .topbar-actions .btn-outline {
+    display: none;
+  }
+
+  /* Tetap tampilkan tombol WA */
+  .topbar-actions .btn-wa {
+    display: inline-flex;
+  }
+
+  /* sync-pill lebih compact */
+  .sync-pill {
+    font-size: 10px;
+    padding: 4px 8px;
+    max-width: 130px;
+  }
+
+  .sync-pill .sync-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px;
+  }
+
+  .menu-toggle {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sidebar {
+    width: min(88vw, 300px);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .nav-item {
+    min-height: 48px;
+    font-size: 0.92rem;
+  }
+
+  .login-card {
+    padding: 1.5rem 1.25rem;
+    border-radius: 16px;
+  }
+
+  .login-brand h1 {
+    font-size: 1.35rem;
+    flex-wrap: wrap;
+  }
+
+  .role-tab {
+    min-height: 44px;
+    font-size: 0.88rem;
+  }
+
+  .chart-box {
+    height: 200px;
+  }
+
+  .chart-donut-wrap {
+    height: 180px;
+    max-width: 180px;
+  }
+
+  .desktop-only-table {
+    display: none;
+  }
+
+  .mobile-member-cards {
+    display: block;
+  }
+
+  .tx-list-item {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .tx-list-item > div:nth-child(2) {
+    flex: 1 1 calc(100% - 56px);
+    min-width: 0;
+  }
+
+  .tx-list-item > div:nth-child(3) {
+    font-size: 1rem;
+    width: 100%;
+    text-align: right;
+    padding-top: 4px;
+    border-top: 1px solid var(--border);
+  }
+
+  .tx-list-item > .no-print {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 4px;
+  }
+
+  .tx-list-item .btn-sm {
+    flex: 1;
+    min-height: 44px;
+    justify-content: center;
+  }
+
+  /* KPI grid 2 kolom di mobile, tidak terpotong */
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  /* Rekap mingguan lebih compact */
+  #weekly-mini .kpi-value {
+    font-size: 0.85rem !important;
+  }
+
+  #weekly-mini .card {
+    padding: 8px 10px;
+    margin: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid-4 {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .card {
+    padding: 1rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .card h3 {
+    font-size: 0.92rem;
+  }
+
+  .kpi-label {
+    font-size: 10px;
+    letter-spacing: 0.6px;
+  }
+
+  .kpi-value {
+    font-size: 1.05rem;
+    line-height: 1.25;
+    word-break: break-word;
+  }
+
+  .btn {
+    padding: 11px 14px;
+    font-size: 0.88rem;
+    min-height: 44px;
+  }
+
+  .btn-sm {
+    padding: 9px 12px;
+    font-size: 0.82rem;
+    min-height: 40px;
+  }
+
+  .btn-icon {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .btn-text {
+    display: none;
+  }
+
+  .topbar-actions .btn {
+    padding: 8px 10px;
+  }
+
+  .sync-pill {
+    font-size: 10px;
+    padding: 6px 10px;
+    max-width: 100%;
+  }
+
+  .sync-pill .sync-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 110px;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+    padding: 13px 12px;
+  }
+
+  .form-group label,
+  .login-form .form-group label {
+    font-size: 11px;
+  }
+
+  .modal-box {
+    width: calc(100% - 24px);
+    max-width: none;
+    margin: 12px;
+    padding: 1.25rem;
+    max-height: calc(100vh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    overflow-y: auto;
+  }
+
+  .week-grid {
+    grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+    gap: 8px;
+  }
+
+  .week-cell {
+    padding: 14px 8px;
+    font-size: 0.8rem;
+    min-height: 72px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .week-toggle-grid {
+    grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+  }
+
+  .filter-bar {
+    gap: 10px;
+  }
+
+  .filter-bar .btn {
+    min-height: 44px;
+  }
+
+  .backup-actions {
+    flex-direction: column;
+  }
+
+  .backup-actions .btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .stat-row {
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+  }
+
+  .toast {
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    font-size: 0.9rem;
+    padding: 14px 16px;
+  }
+
+  .badge {
+    font-size: 10px;
+    padding: 4px 10px;
+  }
+
+  .announcement {
+    padding: 12px;
+  }
+
+  .activity-item {
+    font-size: 0.88rem;
+  }
+
+  #weekly-mini .kpi-value {
+    font-size: 0.82rem !important;
+  }
 }
